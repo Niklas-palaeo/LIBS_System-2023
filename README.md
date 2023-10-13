@@ -1,5 +1,3 @@
-# Read Me
-
 Applying Laser Induced Breakdown Spectroscopy (LIBS) and elemental imaging on marine shells for archaeological and environmental research
 =============================================================================
 

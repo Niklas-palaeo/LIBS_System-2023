@@ -5,7 +5,6 @@ This compendium contains the code and data to reproduce some of the figures and 
 
 Hausmann, N., Theodoraki, D., Pinon, V., Siozos, P., Lemonis,A. and D. Anglos. (2023) [_Applying Laser Induced Breakdown Spectroscopy (LIBS) and elemental imaging on marine shells for archaeological and environmental research_] _Scientific Reports_.
 
-The data itself is citeable using this [![ DOI](https://zenodo.org/badge/248758954.svg)](https://zenodo.org/badge/latestdoi/248758954)
 
 
 How to run

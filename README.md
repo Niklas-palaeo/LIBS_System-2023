@@ -10,7 +10,7 @@ Hausmann, N., Theodoraki, D., Pinon, V., Siozos, P., Lemonis,A. and D. Anglos. (
 How to run
 ------------------------
 
-I suggest to run the code `Figures_code.RMD` by downloading the entire repository and executing the steps within the .Rmd files in the "code" folder on your own PC. This will reproduce the figures. You can also look into the shell maps in more detail using the shiny-shell [repository](https://github.com/Niklas-palaeo/Shiny_Shell). If you don’t want to run anything yourself, or if there is an error, you can upload the csv files to this [Shiny-App](https://nikhausmann.shinyapps.io/Shiny_Shell/). 
+I suggest to run the code by downloading the entire repository and executing the steps within the .Rmd file on your own PC. This will reproduce the figures. You can also look into the shell maps in more detail using the shiny-shell [repository](https://github.com/Niklas-palaeo/Shiny_Shell). If you don’t want to run anything yourself, or if there is an error, you can upload the csv files to this [Shiny-App](https://nikhausmann.shinyapps.io/Shiny_Shell/). 
 
 Feel free to have a look around and please get in touch if you have any questions or ideas.
 

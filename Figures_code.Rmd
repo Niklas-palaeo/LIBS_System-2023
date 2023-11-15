@@ -1,7 +1,7 @@
 ---
 title: "Figures"
 author: "Niklas Hausmann"
-date: '2022-08-19'
+date: '2023-11-13'
 output:
   pdf_document: default
   word_document: default
@@ -27,12 +27,14 @@ knitr::opts_chunk$set(echo=FALSE,message = FALSE,warning = FALSE)
 ```{r Data}
 Shells <- readRDS(here("data","Shells"))
 
+
+
 ```
 
 #Figure Spectrum
 ```{r Figure Spectrum}
 
-Spot1sum <- read_csv(here("data","KP-AP_20210917_M_TEST_raw_data.csv"),
+Spot1_summed_intensity <- read_csv(here("data","KP-AP_20210917_M_TEST_raw_data.csv"),
                   col_names = FALSE) %>%
   pivot_longer(cols=everything() ,names_to="pixel", values_to="intensity") %>%
   mutate(spec=rep(1:102,each=1024)) %>% 
@@ -42,7 +44,7 @@ Spot1sum <- read_csv(here("data","KP-AP_20210917_M_TEST_raw_data.csv"),
   mutate(pixel=as.numeric(gsub("X","",pixel))) %>% 
   arrange(pixel)
 
-Spot1_WL <- read_csv(here("data","KP-AP_20210917_M_TEST_raw_data.csv"),
+Spot1_wavelength <- read_csv(here("data","KP-AP_20210917_M_TEST_raw_data.csv"),
                   col_names = FALSE) %>% 
   slice(102) %>% 
   t() %>% 
@@ -50,12 +52,12 @@ Spot1_WL <- read_csv(here("data","KP-AP_20210917_M_TEST_raw_data.csv"),
   mutate(pixel=as.numeric(rownames(.)))%>% 
   rename(wavelength=V1)
 
-Spot1sum <- Spot1sum %>% 
-  left_join(Spot1_WL,by = "pixel")
+Spot1 <- Spot1_summed_intensity %>% 
+  left_join(Spot1_wavelength,by = "pixel")
 
 
- fig_spec <- 
-  Spot1sum %>% 
+ Fig_spectrum <- 
+  Spot1 %>% 
   ggplot()+
   aes(wavelength,intensity)+
   # geom_vline(xintercept = c(279.41,280.1,285.05,300.6,315.9,318),linetype = "longdash", size=0.25)+
@@ -78,7 +80,7 @@ Spot1sum <- Spot1sum %>%
        x="Wavelength (nm)")+
   coord_cartesian(ylim=c(0, 28000))
 
-fig_spec
+Fig_spectrum
 
 ```
 
@@ -112,12 +114,10 @@ Points <- tibble::tribble(
              "Katiyorgis beach, Aegean sea, Volos",   39.1725588453517,        23.34283486, 5,
                                    "Plakes, Volos",            39.3475,            22.9725, 3
   ) %>% 
-  # # arrange(-Lat) %>%
-  # mutate(number=row_number()) %>% 
   clean_names()
 
 
-Map <- 
+Fig_Map <- 
 ggplot() +
   geom_sf(
     data = Countries, 
@@ -140,6 +140,7 @@ ggplot() +
                 label = number
                 ),
             vjust = -0.5,
+            # hjust = -0.5,
             size= 8
             ) +
    geom_text(data = Points %>% filter(number==11|number==8), 
@@ -169,17 +170,58 @@ ggplot() +
   )+
   theme_cowplot(20)
 
-map
-
-ggsave(map,here("map.png"),dpi = "retina")
-
+Fig_Map
 ```
 
 #Stats Elemental Maps
 
+## Make summary of shell data
+```{r Map Summary data}
+
+Summary_Shells <- Shells %>%
+  filter(!grepl("LINE",filename)) %>% 
+  filter(!grepl("line",filename)) %>% 
+  filter(res==30|res==100) %>%
+  select(filename,site, specimen, res) %>%
+  group_by(filename,site, specimen, res) %>%
+  summarise(n_points=n()) %>%
+  arrange(specimen,.by_group = TRUE) %>% 
+  ungroup() %>% 
+  mutate(time = (n_points/6)/60,
+         area_mm = n_points*(res/1000)^2
+         )
+
+Num_scans_per_Shell <- Summary_Shells %>% 
+  group_by(site,specimen,res) %>% 
+  summarise(n_scans=n()) %>% 
+  ungroup()
+
+Num_scans_per_Site <-
+  Num_scans_per_Shell %>% 
+pivot_wider(names_from = "res",values_from = "n_scans",  names_prefix = "r") %>%
+  group_by(site) %>% 
+  summarise(specimens=n(),
+            Res100=sum(r100,na.rm = TRUE),
+            Res30=sum(r30,na.rm = TRUE)
+            )%>% 
+  ungroup() %>% 
+  adorn_totals()
+
+
+
+```
+
+
+```{r Num_scans_per_Shell, echo = FALSE, results='asis'}
+knitr::kable(Num_scans_per_Site, row.names=FALSE, align=c("l", "r", "r","r"))
+```
+
+
+
 ## Stat Plots
 ```{r Plots Map Statistics}
-  Area <- 
+# Distribution of data by resolution
+  Fig_Area <- 
   Summary_Shells %>% 
     ggplot()+
     aes(x=as.factor(res),y=area_mm,col=as.factor(res))+
@@ -190,10 +232,11 @@ ggsave(map,here("map.png"),dpi = "retina")
       ggtitle("", subtitle="Sampled area by resolution")+theme_cowplot(25)
 
 
-N_Points <-  
+Fig_N_Points <-  
  Summary_Shells %>%
 ggplot()+
   aes(x=as.factor(res),y=n_points)+
+  # geom_boxplot(aes(fill=as.factor(res),col=as.factor(res)))+
   ggbeeswarm::geom_beeswarm(aes(col=as.factor(res)),cex = 1.2, show.legend = FALSE)+
   labs(x="Resolution",y= "Number of Points")+
       scale_color_brewer(palette = "Paired")+
@@ -202,7 +245,7 @@ ggplot()+
   
 
   
-  Time <- 
+  Fig_Time <- 
   Summary_Shells %>% 
     ggplot()+
     aes(x=as.factor(res),y=time,col=as.factor(res))+
@@ -213,26 +256,18 @@ ggplot()+
     ggtitle("", subtitle="Time of analysis by resolution")+theme_cowplot(25)
 
   
-Area+N_Points+Time+plot_annotation(tag_levels = 'A')
-
-
-ggsave2(
-  filename = "Distributions_time-area.png",
-  
-  units = "cm",
-  width = 45,
-  height = 15
-)
+Fig_Area+Fig_N_Points+Fig_Time+plot_annotation(tag_levels = 'A')
 
 ```
 
 
 
 
-## Plot Mg/Ca distribution for all data (not actually helpful without showing the aragonitic layers as well)
+
+## Plot Mg/Ca distribution for all data
 ```{r distribution mineral}
 
-Elemental_distribution <- Shells %>%
+Fig_Elemental_distribution <- Shells %>%
   select(mg_ca) %>%
   filter(mg_ca < 2) %>% # we reduced this number to 2 because occasional outliers exist in the dataset, which would increase the upper limits unnecesarilly
   sample_n(20000) %>%  # this creates a random sub-sample of all measurements (total of 900k)
@@ -245,6 +280,7 @@ Elemental_distribution <- Shells %>%
     priority = "none"
   ) +
   viridis::scale_color_viridis(option = "G") +
+  # Aragonite annotation
   annotate(
     "text",
     x = 5.8,
@@ -282,7 +318,8 @@ Elemental_distribution <- Shells %>%
     size = 1,
     alpha = 0.6
   ) +
-  geom_blank(aes(x=12.5))+ 
+  # Calcite annotation
+  geom_blank(aes(x=12.5))+ # to raise the plot area and prevent the annotation from being cut off
   annotate(
     "text",
     x = 11.8,
@@ -326,22 +363,23 @@ Elemental_distribution <- Shells %>%
   labs(x = "", y = "Mg/Ca Intensity Ratio") +
   ggtitle("Common distribution of Mg/Ca intensity ratios between minerals")
 
-Elemental_distribution+theme_cowplot(20)
+Fig_Elemental_distribution+theme_cowplot(20)
 
-ggsave2(
-  filename = "Elemental_distribution.png",
-  
-  units = "cm",
-  width = 30,
-  height = 20
-)
+# ggsave2(
+#   filename = "Elemental_distribution.png",
+#   
+#   units = "cm",
+#   width = 30,
+#   height = 20
+# )
 
 ```
 
-#Make nice map fir KP-AP F
+
+# Example map for KP-AP F
 ```{r KP-AP_F}
 
-Shell_Map <-
+Fig_Shell_Map <-
   Shells %>% 
     filter(
            !grepl("LINE",filename),
@@ -357,10 +395,9 @@ Shell_Map <-
       fill = mg_ca
     ) +
   theme(panel.background = element_rect(fill = 'white'))+
-  geom_tile(data=. %>% filter(res==30, !grepl("ANT",filename)), show.legend = FALSE)+ 
+  geom_tile(data=. %>% filter(res==30, !grepl("ANT",filename)), show.legend = FALSE)+ # needed to make multiple sets of tile for each resolution and side
   geom_tile(data=. %>% filter(res==30, !grepl("POST",filename)), show.legend = FALSE)+
   geom_tile(data=. %>% filter(res==100), height = 0.1, width=0.1, show.legend = FALSE)+
- 
   viridis::scale_fill_viridis(option = "G")+
   viridis::scale_color_viridis(option = "G")+
   coord_fixed()+
@@ -373,14 +410,15 @@ Shell_Map <-
     curvature = -0.2, arrow = arrow(length = unit(2, "mm")))+
   ggtitle("Mg/Ca ratios in limpet shell")
 
+Fig_Shell_Map
 
-ggsave2(
-  filename = "Shell_Map.png",
-  plot = Shell_Map,
-  units = "cm",
-  width = 21,
-  height = 14
-)
+# ggsave2(
+#   filename = "Shell_Map.png",
+#   plot = Shell_Map,
+#   units = "cm",
+#   width = 21,
+#   height = 14
+# )
 
 
 ```
@@ -426,7 +464,7 @@ Lines <-
     rstd = X6
   ) %>% 
   group_by(order) %>% 
-  mutate(sequence = ifelse(side=="outer",row_number()-n(),(row_number()-1)*-1)) %>% 
+  mutate(sequence = ifelse(side=="outer",row_number()-n(),(row_number()-1)*-1)) %>% #using base ifelse here otherwise i can't subtract 1
   ungroup()
 
 Line_Spectra <- list.files(
@@ -457,7 +495,7 @@ A <- ggplot()+
 B <- 
 Lines %>% 
   filter(order>2) %>% 
-  filter(side=="inner") %>% 
+  filter(side=="inner") %>% # focusing on the inner ones, since the outer ones are veery variable anyway
   mutate(location = ifelse(sequence+6<3,"on flat section", ifelse(sequence+6<4,"on edge", "off shell"))) %>%
   ggplot()+
   aes(group=order, col=location)+
@@ -494,13 +532,15 @@ Fig_edge <- A+theme(plot.tag.position  = c(.03, .98), plot.tag = element_text(co
             C+theme(plot.tag.position  = c(.03, .98))+
                       plot_annotation(tag_levels = "A")+plot_layout(width = c(0.4,0.3,0.3))
 
-ggsave2(
-  filename = "Fig_Edge.png",
-  plot = Fig_edge,
-  units = "cm",
-  width = 21,
-  height = 14
-)
+Fig_edge
+# 
+# ggsave2(
+#   filename = "Fig_Edge.png",
+#   plot = Fig_edge,
+#   units = "cm",
+#   width = 21,
+#   height = 14
+# )
 
 
 ```

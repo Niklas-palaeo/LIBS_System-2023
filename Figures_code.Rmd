@@ -3,12 +3,15 @@ title: "Figures"
 author: "Niklas Hausmann"
 date: '2023-11-13'
 output:
-  pdf_document: default
+  html_document:
+    df_print: paged
   word_document: default
+  pdf_document: default
 ---
 # Libraries 
 ```{r Libraries,echo=FALSE,message = FALSE,warning = FALSE}
 knitr::opts_chunk$set(echo=FALSE,message = FALSE,warning = FALSE)
+knitr::opts_chunk$set(fig.width=6, fig.height=4)
 
 {
   pacman::p_load(
@@ -168,7 +171,7 @@ ggplot() +
     xlim = c(20, 27),
     ylim = c(35, 41)
   )+
-  theme_cowplot(20)
+  theme_cowplot(10)
 
 Fig_Map
 ```
@@ -229,7 +232,7 @@ knitr::kable(Num_scans_per_Site, row.names=FALSE, align=c("l", "r", "r","r"))
     labs(x="Resolution",y=expression('Sample Area in' ~ 'mm'^2))+
       scale_color_brewer(palette = "Paired")+
 
-      ggtitle("", subtitle="Sampled area by resolution")+theme_cowplot(25)
+      ggtitle("", subtitle="Sampled area by resolution")+theme_cowplot(10)
 
 
 Fig_N_Points <-  
@@ -241,7 +244,7 @@ ggplot()+
   labs(x="Resolution",y= "Number of Points")+
       scale_color_brewer(palette = "Paired")+
 
-  ggtitle("", subtitle="Number of points by resolution")+theme_cowplot(25)
+  ggtitle("", subtitle="Number of points by resolution")+theme_cowplot(10)
   
 
   
@@ -253,10 +256,11 @@ ggplot()+
     labs(x="Resolution",y="Time in minutes")+
       scale_color_brewer(palette = "Paired")+
 
-    ggtitle("", subtitle="Time of analysis by resolution")+theme_cowplot(25)
+    ggtitle("", subtitle="Time of analysis by resolution")+theme_cowplot(10)
 
   
 Fig_Area+Fig_N_Points+Fig_Time+plot_annotation(tag_levels = 'A')
+
 
 ```
 
@@ -363,7 +367,7 @@ Fig_Elemental_distribution <- Shells %>%
   labs(x = "", y = "Mg/Ca Intensity Ratio") +
   ggtitle("Common distribution of Mg/Ca intensity ratios between minerals")
 
-Fig_Elemental_distribution+theme_cowplot(20)
+Fig_Elemental_distribution+theme_cowplot(10)
 
 # ggsave2(
 #   filename = "Elemental_distribution.png",

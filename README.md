@@ -39,17 +39,13 @@ Figures
 Niklas Hausmann
 2023-11-13
 
-# Figure Spectrum
-\#Figure Spectrum
+**Figure Spectrum**
 ![](Figures_files/figure-gfm/Figure%20Spectrum-1.png)<!-- -->
 
-# Map of samples
-
+**Map of samples**
 ![](Figures_files/figure-gfm/Map%20of%20samples-1.png)<!-- -->
 
-\#Stats Elemental Maps
-
-## Make summary of shell data
+**Summary of shell data**
 
 | site  | specimens | Res100 | Res30 |
 |:------|----------:|-------:|------:|
@@ -72,24 +68,16 @@ Niklas Hausmann
 | Y-W   |        11 |      8 |    19 |
 | Total |       102 |     95 |   137 |
 
-## Stat Plots
-
+**Stat Plots**
 ![](Figures_files/figure-gfm/Plots%20Map%20Statistics-1.png)<!-- -->
 
-## Plot Mg/Ca distribution for all data
-
+**Plot Mg/Ca distribution for all data**
 ![](Figures_files/figure-gfm/distribution%20mineral-1.png)<!-- -->
 
-# Example map for KP-AP F
-
+**Example map for KP-AP F**
 ![](Figures_files/figure-gfm/KP-AP_F-1.png)<!-- -->
 
-# SEM
-
-## Data
-
-## Plots (SEM IMAGE)
-
+**SEM Tests**
 ![](Figures_files/figure-gfm/line%20plots-1.png)<!-- -->
 
 
